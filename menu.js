@@ -70,3 +70,7 @@ function renderMenu(lang){
  root.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{menuMode=b.dataset.mode;menuCategory=menuMode==='daily'?'breakfast':'sets';renderMenu(document.documentElement.lang)}));
  root.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{menuCategory=b.dataset.category;renderMenu(document.documentElement.lang)}));
 }
+
+// Context links from the dessert, wine and event stories into the matching menu.
+document.querySelectorAll('[data-open-grill]').forEach(a=>a.addEventListener('click',()=>{menuMode='grill';menuCategory=a.dataset.openGrill;renderMenu(document.documentElement.lang)}));
+document.querySelectorAll('[data-open-daily]').forEach(a=>a.addEventListener('click',()=>{menuMode='daily';menuCategory=a.dataset.openDaily;renderMenu(document.documentElement.lang)}));

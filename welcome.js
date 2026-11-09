@@ -7,11 +7,13 @@
   const play = root.querySelector('.welcome-play');
   const sound = root.querySelector('.welcome-sound');
   const progress = root.querySelector('.welcome-progress');
+  const back = document.querySelector('.section-back');
+  const sectionIds = ['about','food','dessert','wines','terrace','events','contact'];
   const background = [...document.body.children].filter(el => el !== root && !['SCRIPT','LINK'].includes(el.tagName));
   const copy = {
-    ro:{soundOn:'Pornește muzica ♪',soundOff:'Oprește sunetul',skip:'Vezi categoriile ↗',play:'Redă filmul ▷',filmTitle:'O seară la noi.',title:'Bine ai venit la Cocof.',menu:'Meniu & rezervări',replay:'Revezi atmosfera ▷',close:'Intră pe site ↗',booking:'Ai ales ce îți place? Rezervă o masă.',call:'Rezervă o masă ↗'},
-    ru:{soundOn:'Включить музыку ♪',soundOff:'Выключить звук',skip:'К разделам ↗',play:'Смотреть видео ▷',filmTitle:'Вечер у нас.',title:'Добро пожаловать в Cocof.',menu:'Меню и бронь',replay:'Посмотреть ещё раз ▷',close:'Открыть сайт ↗',booking:'Выбрали любимое блюдо? Забронируйте столик.',call:'Забронировать ↗'},
-    en:{soundOn:'Play music ♪',soundOff:'Mute sound',skip:'Explore categories ↗',play:'Play film ▷',filmTitle:'An evening with us.',title:'Welcome to Cocof.',menu:'Menu & reservations',replay:'Watch again ▷',close:'Enter the website ↗',booking:'Found your favourite? Book a table.',call:'Book a table ↗'}
+    ro:{soundOn:'Pornește muzica ♪',soundOff:'Oprește sunetul',skip:'Vezi categoriile ↗',play:'Pornește sunetul ♪',filmTitle:'O seară la noi.',title:'Bine ai venit la Cocof.',menu:'Meniu & rezervări',replay:'Revezi atmosfera ▷',close:'Intră pe site ↗',booking:'Ai ales ce îți place? Rezervă o masă.',call:'Rezervă o masă ↗'},
+    ru:{soundOn:'Включить музыку ♪',soundOff:'Выключить звук',skip:'К разделам ↗',play:'Включить звук ♪',filmTitle:'Вечер у нас.',title:'Добро пожаловать в Cocof.',menu:'Меню и бронь',replay:'Посмотреть ещё раз ▷',close:'Открыть сайт ↗',booking:'Выбрали любимое блюдо? Забронируйте столик.',call:'Забронировать ↗'},
+    en:{soundOn:'Play music ♪',soundOff:'Mute sound',skip:'Explore categories ↗',play:'Turn on sound ♪',filmTitle:'An evening with us.',title:'Welcome to Cocof.',menu:'Menu & reservations',replay:'Watch again ▷',close:'Enter the website ↗',booking:'Found your favourite? Book a table.',call:'Book a table ↗'}
   };
   const booking = document.createElement('div');
   booking.className = 'menu-booking';
@@ -28,6 +30,7 @@
   new MutationObserver(translate).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   function close(target){
     video.pause(); root.hidden = true; document.body.classList.remove('welcome-open');
+    if(target && sectionIds.includes(target.slice(1))){document.body.dataset.section=target.slice(1);back.hidden=false;}else{delete document.body.dataset.section;back.hidden=true;}
     background.forEach(el => el.inert = false);
     if(target){location.hash=target; const section=document.querySelector(target); section?.scrollIntoView(); if(section){section.tabIndex=-1;section.focus({preventScroll:true});}}
     else document.querySelector('.brand')?.focus();
@@ -37,8 +40,14 @@
     choices.querySelector('a').focus({preventScroll:true});
   }
   async function startFilm(){
-    film.hidden=false;choices.hidden=true;play.hidden=true;video.currentTime=0;translate();
-    try{await video.play();}catch{play.hidden=false;}
+    film.hidden=false;choices.hidden=true;play.hidden=true;video.currentTime=0;
+    video.muted=false;translate();
+    try{await video.play();}
+    catch{
+      video.muted=true;translate();
+      try{await video.play();}catch{play.hidden=false;}
+      play.hidden=false;
+    }
   }
   function open(){
     root.hidden=false; document.body.classList.add('welcome-open'); background.forEach(el=>el.inert=true);
@@ -52,7 +61,7 @@
     if(video.paused) video.play().catch(()=>{play.hidden=false;});
   });
   video.addEventListener('volumechange',translate);
-  play.addEventListener('click',()=>{video.muted=false;startFilm();});
+  play.addEventListener('click',()=>{video.muted=false;play.hidden=true;video.play().catch(()=>{play.hidden=false;});translate();});
   root.querySelector('.welcome-replay').addEventListener('click',startFilm);
   video.addEventListener('ended',showChoices);
   video.addEventListener('error',showChoices);
@@ -68,7 +77,8 @@
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
     }
   });
+  back.addEventListener('click',()=>{delete document.body.dataset.section;back.hidden=true;root.hidden=false;document.body.classList.add('welcome-open');background.forEach(el=>el.inert=true);history.replaceState(null,'',location.pathname);showChoices();});
   document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();root.hidden=false;document.body.classList.add('welcome-open');background.forEach(el=>el.inert=true);showChoices();});
   translate();
-  if(!location.hash || location.hash==='#home') open();
+  if(location.hash && sectionIds.includes(location.hash.slice(1))){document.body.dataset.section=location.hash.slice(1);back.hidden=false;}else open();
 })();

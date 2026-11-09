@@ -8,6 +8,8 @@
   const sound = root.querySelector('.welcome-sound');
   const progress = root.querySelector('.welcome-progress');
   const back = document.querySelector('.section-back');
+  const toolbar = document.querySelector('.section-toolbar');
+  const backCopy={ro:'Înapoi la categorii',ru:'Назад к разделам',en:'Back to categories'};
   const sectionIds = ['about','food','dessert','wines','terrace','events','contact'];
   const background = [...document.body.children].filter(el => el !== root && !['SCRIPT','LINK'].includes(el.tagName));
   const copy = {
@@ -26,11 +28,13 @@
     skip.textContent = choices.hidden ? t.skip : t.close;
     sound.textContent = video.muted ? t.soundOn : t.soundOff;
     sound.setAttribute('aria-pressed', String(!video.muted));
+    document.querySelector('[data-section-back]').textContent=backCopy[document.documentElement.lang]||backCopy.ro;
+    document.querySelectorAll('[data-section-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sectionLang===document.documentElement.lang)));
   }
   new MutationObserver(translate).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   function close(target){
     video.pause(); root.hidden = true; document.body.classList.remove('welcome-open');
-    if(target && sectionIds.includes(target.slice(1))){document.body.dataset.section=target.slice(1);back.hidden=false;}else{delete document.body.dataset.section;back.hidden=true;}
+    if(target && sectionIds.includes(target.slice(1))){document.body.dataset.section=target.slice(1);toolbar.hidden=false;}else{delete document.body.dataset.section;toolbar.hidden=true;}
     background.forEach(el => el.inert = false);
     if(target){location.hash=target; const section=document.querySelector(target); section?.scrollIntoView(); if(section){section.tabIndex=-1;section.focus({preventScroll:true});}}
     else document.querySelector('.brand')?.focus();
@@ -77,8 +81,9 @@
       else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
     }
   });
-  back.addEventListener('click',()=>{delete document.body.dataset.section;back.hidden=true;root.hidden=false;document.body.classList.add('welcome-open');background.forEach(el=>el.inert=true);history.replaceState(null,'',location.pathname);showChoices();});
+  document.querySelectorAll('[data-section-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.sectionLang)));
+  back.addEventListener('click',()=>{delete document.body.dataset.section;toolbar.hidden=true;root.hidden=false;document.body.classList.add('welcome-open');background.forEach(el=>el.inert=true);history.replaceState(null,'',location.pathname);showChoices();});
   document.querySelector('.brand').addEventListener('click',e=>{e.preventDefault();root.hidden=false;document.body.classList.add('welcome-open');background.forEach(el=>el.inert=true);showChoices();});
   translate();
-  if(location.hash && sectionIds.includes(location.hash.slice(1))){document.body.dataset.section=location.hash.slice(1);back.hidden=false;}else open();
+  if(location.hash && sectionIds.includes(location.hash.slice(1))){document.body.dataset.section=location.hash.slice(1);toolbar.hidden=false;}else open();
 })();

@@ -5,12 +5,13 @@
   const choices = root.querySelector('.welcome-choices');
   const skip = root.querySelector('.welcome-skip');
   const play = root.querySelector('.welcome-play');
+  const sound = root.querySelector('.welcome-sound');
   const progress = root.querySelector('.welcome-progress');
   const background = [...document.body.children].filter(el => el !== root && !['SCRIPT','LINK'].includes(el.tagName));
   const copy = {
-    ro:{skip:'Vezi categoriile ↗',play:'Redă filmul ▷',filmTitle:'O seară la noi.',title:'Bine ai venit la Cocof.',menu:'Meniu & rezervări',replay:'Revezi atmosfera ▷',close:'Intră pe site ↗',booking:'Ai ales ce îți place? Rezervă o masă.',call:'Rezervă o masă ↗'},
-    ru:{skip:'К разделам ↗',play:'Смотреть видео ▷',filmTitle:'Вечер у нас.',title:'Добро пожаловать в Cocof.',menu:'Меню и бронь',replay:'Посмотреть ещё раз ▷',close:'Открыть сайт ↗',booking:'Выбрали любимое блюдо? Забронируйте столик.',call:'Забронировать ↗'},
-    en:{skip:'Explore categories ↗',play:'Play film ▷',filmTitle:'An evening with us.',title:'Welcome to Cocof.',menu:'Menu & reservations',replay:'Watch again ▷',close:'Enter the website ↗',booking:'Found your favourite? Book a table.',call:'Book a table ↗'}
+    ro:{soundOn:'Pornește muzica ♪',soundOff:'Oprește sunetul',skip:'Vezi categoriile ↗',play:'Redă filmul ▷',filmTitle:'O seară la noi.',title:'Bine ai venit la Cocof.',menu:'Meniu & rezervări',replay:'Revezi atmosfera ▷',close:'Intră pe site ↗',booking:'Ai ales ce îți place? Rezervă o masă.',call:'Rezervă o masă ↗'},
+    ru:{soundOn:'Включить музыку ♪',soundOff:'Выключить звук',skip:'К разделам ↗',play:'Смотреть видео ▷',filmTitle:'Вечер у нас.',title:'Добро пожаловать в Cocof.',menu:'Меню и бронь',replay:'Посмотреть ещё раз ▷',close:'Открыть сайт ↗',booking:'Выбрали любимое блюдо? Забронируйте столик.',call:'Забронировать ↗'},
+    en:{soundOn:'Play music ♪',soundOff:'Mute sound',skip:'Explore categories ↗',play:'Play film ▷',filmTitle:'An evening with us.',title:'Welcome to Cocof.',menu:'Menu & reservations',replay:'Watch again ▷',close:'Enter the website ↗',booking:'Found your favourite? Book a table.',call:'Book a table ↗'}
   };
   const booking = document.createElement('div');
   booking.className = 'menu-booking';
@@ -21,6 +22,8 @@
     const t = copy[document.documentElement.lang] || copy.ro;
     document.querySelectorAll('[data-welcome]').forEach(el => el.textContent = t[el.dataset.welcome]);
     skip.textContent = choices.hidden ? t.skip : t.close;
+    sound.textContent = video.muted ? t.soundOn : t.soundOff;
+    sound.setAttribute('aria-pressed', String(!video.muted));
   }
   new MutationObserver(translate).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   function close(target){
@@ -43,7 +46,13 @@
     else {startFilm(); skip.focus({preventScroll:true});}
   }
   skip.addEventListener('click',()=>choices.hidden?showChoices():close('#home'));
-  play.addEventListener('click',startFilm);
+  sound.addEventListener('click',()=>{
+    video.muted = !video.muted;
+    translate();
+    if(video.paused) video.play().catch(()=>{play.hidden=false;});
+  });
+  video.addEventListener('volumechange',translate);
+  play.addEventListener('click',()=>{video.muted=false;startFilm();});
   root.querySelector('.welcome-replay').addEventListener('click',startFilm);
   video.addEventListener('ended',showChoices);
   video.addEventListener('error',showChoices);

@@ -40,7 +40,7 @@
     else document.querySelector('.brand')?.focus();
   }
   function showChoices(){
-    video.pause(); film.hidden=true; choices.hidden=false; root.scrollTop=0;translate();
+    video.pause(); film.hidden=true; choices.hidden=false; root.scrollTop=0;choices.scrollTop=0;requestAnimationFrame(()=>{root.scrollTop=0;choices.scrollTop=0;});translate();
     choices.querySelector('a').focus({preventScroll:true});
   }
   async function startFilm(){

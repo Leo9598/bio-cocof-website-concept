@@ -17,6 +17,11 @@
     ru:{soundOn:'Включить музыку ♪',soundOff:'Выключить звук',skip:'К разделам ↗',play:'Включить звук ♪',filmTitle:'Вечер у нас.',title:'Добро пожаловать в Cocof.',menu:'Меню и бронь',replay:'Посмотреть ещё раз ▷',close:'Открыть сайт ↗',booking:'Выбрали любимое блюдо? Забронируйте столик.',call:'Забронировать ↗'},
     en:{soundOn:'Play music ♪',soundOff:'Mute sound',skip:'Explore categories ↗',play:'Turn on sound ♪',filmTitle:'An evening with us.',title:'Welcome to Cocof.',menu:'Menu & reservations',replay:'Watch again ▷',close:'Enter the website ↗',booking:'Found your favourite? Book a table.',call:'Book a table ↗'}
   };
+  const panelCopy={
+    ro:{intro:'Cu ce începem?',foodNote:'De la micul dejun la cină',wineNote:'Descoperă colecția',dessertNote:'Un final dulce',aboutNote:'Povestea locului',terraceNote:'Seri în aer liber',eventsNote:'Împreună, la aceeași masă',contactNote:'Ne găsești în centru',book:'Rezervă o masă'},
+    ru:{intro:'С чего начнём?',foodNote:'От завтрака до ужина',wineNote:'Откройте коллекцию',dessertNote:'Сладкое завершение',aboutNote:'История нашего места',terraceNote:'Вечера на свежем воздухе',eventsNote:'Вместе за одним столом',contactNote:'Мы в центре города',book:'Забронировать столик'},
+    en:{intro:'Where shall we start?',foodNote:'From breakfast to dinner',wineNote:'Explore the collection',dessertNote:'Something sweet',aboutNote:'Get to know our place',terraceNote:'Evenings outdoors',eventsNote:'Together around the table',contactNote:'Find us in the centre',book:'Book a table'}
+  };
   const booking = document.createElement('div');
   booking.className = 'menu-booking';
   booking.innerHTML = '<p data-welcome="booking"></p><a href="tel:+37368330088" data-welcome="call"></a>';
@@ -24,6 +29,8 @@
   if(menuHeading){ const bookingWrap=document.createElement('div'); bookingWrap.className='wrap'; bookingWrap.append(booking); menuHeading.before(bookingWrap); }
   function translate(){
     const t = copy[document.documentElement.lang] || copy.ro;
+    const panel = panelCopy[document.documentElement.lang] || panelCopy.ro;
+    root.querySelectorAll('[data-panel-copy]').forEach(el=>el.textContent=panel[el.dataset.panelCopy]);
     document.querySelectorAll('[data-welcome]').forEach(el => el.textContent = t[el.dataset.welcome]);
     skip.textContent = choices.hidden ? t.skip : t.close;
     sound.textContent = video.muted ? t.soundOn : t.soundOff;
@@ -40,10 +47,12 @@
     else document.querySelector('.brand')?.focus();
   }
   function showChoices(){
+    root.classList.add('showing-choices');
     video.pause(); film.hidden=true; choices.hidden=false; root.scrollTop=0;choices.scrollTop=0;requestAnimationFrame(()=>{root.scrollTop=0;choices.scrollTop=0;});translate();
     choices.querySelector('a').focus({preventScroll:true});
   }
   async function startFilm(){
+    root.classList.remove('showing-choices');
     film.hidden=false;choices.hidden=true;play.hidden=true;video.currentTime=0;
     video.muted=false;translate();
     try{await video.play();}
